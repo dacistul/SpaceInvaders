@@ -1,26 +1,37 @@
 import random
 import pygame
+import Settings
+from pygame import Vector2
+from SpriteLib import ScaledSprite
 
-class Enemy(pygame.sprite.Sprite):
+directions = [Vector2( 1, 0),
+			  Vector2( 0,1),
+			  Vector2(-1, 0),
+			  Vector2( 0, 1)]
+
+class Enemy(ScaledSprite):
 	def __init__(self, x, y, health):
-		pygame.sprite.Sprite.__init__(self)
-		self._scale = 1
+		super().__init__(2,pygame.image.load("assets/textures/enemies/enemy1.png"))
 		self.health = health
-		self.image = pygame.image.load("assets/textures/enemies/enemy1.png")
-		self.rect = self.image.get_rect()
-		self.rect.center = [x, y]
+		self.rect.center = Vector2(x, y)
 		self.mask = pygame.mask.from_surface(self.image)
-		self.setScale(2.2)
-	
-	def setScale(self, scale):
-		new_width = self.rect.w * scale / self._scale
-		new_height = self.rect.h * scale / self._scale
-		self.rect = pygame.Rect((self.rect.x + (self.rect.w - new_width) / 2,
-						self.rect.y + (self.rect.h - new_height) / 2,
-						self.rect.w * scale / self._scale,
-						self.rect.h * scale / self._scale))
-		self._scale = scale
-		self.image = pygame.transform.scale_by(self.image, self._scale)
+
+		self.direction = 0
+		self.last_turn = Vector2(x,y)
 	
 	def update(self):
-		pass
+		if self.direction == 0 and self.rect.right > Settings.SCREEN_WIDTH-10:
+			self.direction = 1
+			self.last_turn = Vector2(self.rect.center)
+		if self.direction == 1 and self.rect.top > self.last_turn.y + 0.06*Settings.SCREEN_HEIGHT:
+			self.direction = 2
+			self.last_turn = Vector2(self.rect.center)
+		if self.direction == 2 and self.rect.left < 10:
+			self.direction = 3
+			self.last_turn = Vector2(self.rect.center)
+		if self.direction == 3 and self.rect.top > self.last_turn.y + 0.06*Settings.SCREEN_HEIGHT:
+			self.direction = 0
+			self.last_turn = Vector2(self.rect.center)
+		self.addPosition(directions[self.direction]*1)
+
+

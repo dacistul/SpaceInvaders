@@ -1,11 +1,9 @@
 import pygame
-import sys
-
-
-pygame.init()
+from pygame import Vector2
+from pygame.locals import *
 
 class ScaledSprite(pygame.sprite.Sprite):
-    def __init__(self, scale, image,position=pygame.Vector2()):
+    def __init__(self, scale, image, position:Vector2 = Vector2()):
         super().__init__()
         self._scale = 1
         self.image = image
@@ -13,16 +11,19 @@ class ScaledSprite(pygame.sprite.Sprite):
         self.setPosition(position)
         self.setScale(scale)
 
-    def setPosition(self, position):
+    def setPosition(self, position:Vector2):
         self.rect.x=position.x
         self.rect.y=position.y
+    def addPosition(self, position:Vector2):
+        self.rect.x+=position.x
+        self.rect.y+=position.y
 
     def setScale(self, scale):
-        self._scale = scale
-
         self.rect = pygame.Rect((self.rect.x,self.rect.y,self.rect.w*scale/self._scale,
                           self.rect.h*scale/self._scale))
-        self.image = pygame.transform.scale_by(self.image, self._scale)
+        self.image = pygame.transform.scale_by(self.image, scale/self._scale)
+        self.mask = pygame.mask.from_surface(self.image)
+        self._scale = scale
 
 class AtlasSprite(ScaledSprite):
     def __init__(self, spritesX, spritesY, atlas, scale):
@@ -34,37 +35,3 @@ class AtlasSprite(ScaledSprite):
     def selectSprite(self, xIndex=0, yIndex=0):
         self.image = pygame.transform.scale_by(self._atlas.subsurface((self._spriteWidth*xIndex,self._spriteHeight*yIndex,self._spriteWidth,self._spriteHeight)), self._scale)
 
-class HealthBar(AtlasSprite):
-    def __init__(self):
-        super().__init__(1,3,pygame.image.load("assets/textures/health.png"),5)
-        self.setHealth(2)
-
-
-    def setHealth(self, health):
-        self.selectSprite(0,health-1)
-
-
-
-display = pygame.display.set_mode((640, 480))
-hb = HealthBar()
-
-rootGroup = pygame.sprite.Group()
-uiGroup = pygame.sprite.Group()
-rootGroup.add(hb)
-health=1
-
-while True:
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
-
-    health = health + 1
-    if health > 3:
-        health = 1
-    hb.setHealth(health)
-
-    rootGroup.draw(display)
-    pygame.display.update()
-    pygame.time.delay(1000)
-    
