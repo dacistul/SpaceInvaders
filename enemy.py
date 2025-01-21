@@ -19,7 +19,7 @@ class Enemy(ScaledSprite):
 		self.direction = 0
 		self.last_turn = Vector2(x,y)
 	
-	def update(self):
+	def update(self, level):
 		if self.direction == 0 and self.rect.right > Settings.SCREEN_WIDTH-10:
 			self.direction = 1
 			self.last_turn = Vector2(self.rect.center)
@@ -32,6 +32,6 @@ class Enemy(ScaledSprite):
 		if self.direction == 3 and self.rect.top > self.last_turn.y + 0.06*Settings.SCREEN_HEIGHT:
 			self.direction = 0
 			self.last_turn = Vector2(self.rect.center)
-		self.addPosition(directions[self.direction]*1)
+		self.addPosition(directions[self.direction]*(1.0+(level/10)))
 
 
